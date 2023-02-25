@@ -7,15 +7,27 @@ output:
 
 
 ## Loading and preprocessing the data
+activity <- read.table(unz("activity.zip", "activity.csv"),
+header=T, quote="\"", sep=",")
 
+activity$date <- as.Date(activity$date)
 
 
 ## What is mean total number of steps taken per day?
-
+activity.no.na <- na.omit(activity)  
+dailySteps <- rowsum(activity.no.na$steps, format(activity.no.na$date,'%Y-%m-%d'))  
+dailySteps <- data.frame(dailySteps)
+names(dailySteps) <- "Steps"  
+hist(dailySteps$Steps, main = "Number of days Vs No. of Steps", xlab = "Total Number of Steps", ylab = "Number of days", 
+breaks = 10, col = "gray",xlim = c(0, 25000), ylim = c(0, 20)) 
 
 
 ## What is the average daily activity pattern?
+library(plyr)
+interval.steps <- ddply(activity.no.na, ~interval, summarize, mean = mean(steps))
 
+library(ggplot2)
+qplot(x=interval, y=mean, data = interval.steps,  geom = "line", xlab="5-Minute Interval", ylab="Number of Step Count", main="Average Number of Steps Taken Across All Days")
 
 
 ## Imputing missing values
